@@ -20,7 +20,8 @@ src/
 ├── config/queue.ts          # BullMQ connection and withdrawalQueue
 ├── constants/
 │   ├── errorCodes.ts        # ErrorCodes object — all error code strings
-│   └── errorMessages.ts     # ErrorMessages object — all user-facing error messages
+│   ├── errorMessages.ts     # ErrorMessages object — all user-facing error messages
+│   └── regex.ts             # Shared regex patterns (e.g. OBJECT_ID_REGEX for MongoDB ObjectIds)
 ├── models/                  # Mongoose schemas
 ├── repositories/            # DB access, one file per collection
 ├── services/                # Business logic (WithdrawalService is the main one)
@@ -88,7 +89,7 @@ A few things I made sure to handle:
 
 --> Input validation — all request data goes through Zod schemas.
 
---> ObjectId validation  — route params are also validated with Zod before they touch the DB. Passing a random string as (:id) returns a 400, not a Mongoose cast error.
+--> ObjectId validation  — route params are validated with Zod using OBJECT_ID_REGEX from constants/regex.ts before they touch the DB. Passing a random string as (:id) returns a 400, not a Mongoose cast error.
 
 --> No floats — all amounts are stored as integers in the smallest currency unit (paise for INR).
 
