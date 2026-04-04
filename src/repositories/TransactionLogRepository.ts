@@ -12,6 +12,7 @@ type CreateLogData = {
   status: "pending" | "success" | "failed";
 };
 
+// function to create a transaction log
 export const TransactionLogRepository = {
   create(data: CreateLogData) {
     return TransactionLog.create(data);

@@ -2,8 +2,11 @@ import { z, type ZodType } from "zod";
 import type { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import { ErrorMessages } from "@/constants/errorMessages";
+import { OBJECT_ID_REGEX } from "@/constants/regex";
 
-const objectId = z.string().regex(/^[a-f\d]{24}$/i, "Invalid ID format");
+const objectId = z.string().regex(OBJECT_ID_REGEX, "Invalid ID format");
+
+type ParseTarget = "body" | "params" | "query";
 
 export const createWithdrawalSchema = z.object({
   userId: objectId,
@@ -22,7 +25,6 @@ export const userIdParamSchema = z.object({
   userId: objectId,
 });
 
-type ParseTarget = "body" | "params" | "query";
 
 export function validate(schema: ZodType, target: ParseTarget = "body") {
   return (req: Request, res: Response, next: NextFunction) => {

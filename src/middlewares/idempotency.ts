@@ -5,8 +5,10 @@ import { ErrorMessages } from "@/constants/errorMessages";
 import { IdempotencyKey } from "@/models";
 import logger from "@/utils/logger";
 
+// 24 hours
 const TTL_MS = 24 * 60 * 60 * 1000; 
 
+// middleware to check for idempotency
 export async function idempotency(req: Request, res: Response, next: NextFunction) {
   const key = req.headers["x-idempotency-key"] as string | undefined;
   if (!key) {

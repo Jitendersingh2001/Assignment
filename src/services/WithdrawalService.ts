@@ -1,10 +1,7 @@
-import mongoose from "mongoose";
 import { TransactionLog } from "@/models";
 import { UserRepository } from "@/repositories/UserRepository";
 import { WalletRepository } from "@/repositories/WalletRepository";
 import { WithdrawalRepository } from "@/repositories/WithdrawalRepository";
-import { StatusCodes } from "http-status-codes";
-import { ErrorMessages } from "@/constants/errorMessages";
 import {
   AppError,
   InsufficientFundsError,
@@ -16,12 +13,18 @@ import {
 import logger from "@/utils/logger";
 
 export const WithdrawalService = {
+
+  // function to create a withdrawal
   async createWithdrawal(userId: string, amountMinor: number, destination: string) {
+
     const user = await UserRepository.findById(userId);
+
     if (!user) throw new UserNotFoundError();
+
     if (user.status !== "active") throw new UserSuspendedError(user.status);
 
     const wallet = await WalletRepository.findByUserId(userId);
+    
     if (!wallet) throw new WalletNotFoundError();
 
     if (wallet.balanceMinor < amountMinor) throw new InsufficientFundsError();
@@ -31,11 +34,12 @@ export const WithdrawalService = {
     return WithdrawalRepository.create({ userId, amountMinor, destination, status: "pending" });
   },
 
+  // function to process a withdrawal
   async processWithdrawal(withdrawalId: string) {
     const withdrawal = await WithdrawalRepository.findById(withdrawalId);
-    if (!withdrawal) throw new AppError(ErrorMessages.NOT_FOUND("Withdrawal"), StatusCodes.NOT_FOUND);
+    
+    if (!withdrawal) throw new WithdrawalNotFoundError();
 
-    // If the job is retried after a partial success, bail out early
     if (withdrawal.status !== "pending") {
       logger.warn("Skipping already-processed withdrawal", {
         withdrawalId,
@@ -44,13 +48,13 @@ export const WithdrawalService = {
       return;
     }
 
-    const id = withdrawal._id as mongoose.Types.ObjectId;
+    const id = withdrawal._id;
 
     try {
       await WithdrawalRepository.updateStatus(id, "processing");
 
       const walletBefore = await WalletRepository.deductBalance(
-        (withdrawal.userId as mongoose.Types.ObjectId).toString(),
+        withdrawal.userId.toString(),
         withdrawal.amountMinor
       );
 
@@ -81,12 +85,14 @@ export const WithdrawalService = {
     }
   },
 
+  // function to get a withdrawal by ID
   async getWithdrawal(id: string) {
     const withdrawal = await WithdrawalRepository.findById(id);
     if (!withdrawal) throw new WithdrawalNotFoundError();
     return withdrawal;
   },
 
+  // function to get withdrawals for a user
   async getUserWithdrawals(userId: string) {
     const user = await UserRepository.findById(userId);
     if (!user) throw new UserNotFoundError();

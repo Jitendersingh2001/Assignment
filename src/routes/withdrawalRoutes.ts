@@ -5,6 +5,7 @@ import { idempotency } from "@/middlewares/idempotency";
 
 const router = Router();
 
+// route to initiate a withdrawal
 router.post(
   "/",
   idempotency,
@@ -12,6 +13,7 @@ router.post(
   WithdrawalController.initiate
 );
 
+// route to get a withdrawal by ID
 router.get("/:id", validate(idParamSchema, "params"), WithdrawalController.getById);
 
 export default router;

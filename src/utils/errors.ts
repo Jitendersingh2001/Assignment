@@ -4,9 +4,9 @@ import { ErrorMessages } from "@/constants/errorMessages";
 
 export class AppError extends Error {
   public readonly statusCode: number;
-  public readonly code: ErrorCode | string;
+  public readonly code: ErrorCode;
 
-  constructor(message: string, statusCode = StatusCodes.INTERNAL_SERVER_ERROR, code: ErrorCode | string = ErrorCodes.INTERNAL_ERROR) {
+  constructor(message: string, statusCode = StatusCodes.INTERNAL_SERVER_ERROR, code: ErrorCode = ErrorCodes.INTERNAL_ERROR) {
     super(message);
     this.name = this.constructor.name;
     this.statusCode = statusCode;

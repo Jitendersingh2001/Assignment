@@ -2,9 +2,10 @@ import type { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import { WithdrawalService } from "@/services/WithdrawalService";
 import { withdrawalQueue } from "@/config/queue";
-import { ErrorMessages } from "@/constants/errorMessages";
 
 export const WithdrawalController = {
+
+  // function to initiate a withdrawal
   async initiate(req: Request, res: Response, next: NextFunction) {
     try {
       const { userId, amountMinor, destination } = req.body as {
@@ -23,25 +24,23 @@ export const WithdrawalController = {
     }
   },
 
+  // function to get a withdrawal by ID
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = String(req.params.id);
       const withdrawalResponse = await WithdrawalService.getWithdrawal(id);
-      if (!withdrawalResponse) {
-        return res.status(StatusCodes.NOT_FOUND).json({ error: ErrorMessages.NOT_FOUND("Withdrawal") });
-      }
       res.json({ success: true, data: withdrawalResponse });
     } catch (err) {
       next(err);
     }
   },
 
+  // function to get withdrawals for a user
   async getByUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const withdrawals = await WithdrawalService.getUserWithdrawals(
-        String(req.params.userId)
-      );
-      res.json({ success: true, data: withdrawals });
+      const userId = String(req.params.userId);
+      const userWithdrawals = await WithdrawalService.getUserWithdrawals(userId);
+      res.json({ success: true, data: userWithdrawals });
     } catch (err) {
       next(err);
     }
